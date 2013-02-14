@@ -3,20 +3,22 @@ import sys
 import pygame
 import math
 from time import *
+import random
 
 #definimos
 
-minimo = 100
+minimo = 127
 maximo = 200
 
 #cargamos y abrimos imagen
 def imagen():
-    img = Image.open("dori.jpg")
+    img = Image.open("cora.jpg")
+    img2= Image.open("cora.jpg")
     ancho,alto = img.size
-    img = eg(img,ancho,alto)
+    img = eg(img,ancho,alto,img2)
     return img, ancho, alto
     
-def eg(img,ancho,alto):
+def eg(img,ancho,alto,img2):
     pixeles = img.load()
     imageng = 'escg.jpg'
     for i in range (ancho):
@@ -28,6 +30,8 @@ def eg(img,ancho,alto):
     img.save(imageng)
     filtro(img,ancho,alto)
     conv(img,ancho,alto)
+    ruido(img2,ancho,alto)
+    byeruido(img2,ancho,alto)
     return imageng
 
 def filtro(img,ancho,alto):
@@ -96,6 +100,49 @@ def conv(img,ancho,alto):
     timef= timei - tiemp
     print "Tiempo de ejecucion deteccion de bordes: "+str(timef)+"segundos"
 
+
+def ruido(img2, ancho,alto):
+    t1 = time()
+    pixel= img2.load()
+    for i in range(ancho):
+        for j in range(alto):
+            (r,g,b)= img2.getpixel((i,j)) #obtener pixeles
+            ruido = random.randint(0,255) #generar ruido random
+            z = random.randint(0,5000)
+            try:
+                if (ruido < 100):
+                    pixel[i+z,j+z]=(0,0,0) #pixel leido mas un numero random para agregar pimienta
+                else:
+                    pixel[i+z,j+z] = (255,255,255) #pixel + # rand para agregar sal
+            except:
+                pass
+    img2 = img2.save('ruido.jpg')
+    timei=time()
+    timef = timei - t1
+    print "el tiempo para agregar ruido es:"+str(timef)+"segundos"
+
+def byeruido(img2,ancho,alto):
+    pixel = img2.load()
+    t2=time()
+    for i in range(ancho):
+        for j in range(alto):
+            (r,g,b)=img2.getpixel((i,j))
+            try:
+                if(pixel[i,j]==(0,0,0) or pixel[i,j]==(255,255,255)):  
+                    #print pixel[i,j]
+                    #print "ya pase por aki"
+                    pixel[i,j] = pixel[i+1,j]
+                    #print pixel[i+1,j]
+                    #print "ya pase por aka"
+                else:
+                    #print "Ola k ase" #es broma
+                    continue
+            except:
+                pass
+    img2.save('snruido.jpg')
+    timei = time()
+    timef = timei -t2
+    print "el tiempo para quitar el ruido es:"+str(timef)+"segundos"
 
 def main ():
     pygame.init()
