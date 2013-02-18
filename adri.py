@@ -12,8 +12,8 @@ maximo = 200
 
 #cargamos y abrimos imagen
 def imagen():
-    img = Image.open("cora.jpg")
-    img2= Image.open("cora.jpg")
+    img = Image.open("sakura.jpg")
+    img2= Image.open("sakura.jpg")
     ancho,alto = img.size
     img = eg(img,ancho,alto,img2)
     return img, ancho, alto
@@ -32,6 +32,8 @@ def eg(img,ancho,alto,img2):
     conv(img,ancho,alto)
     ruido(img2,ancho,alto)
     byeruido(img2,ancho,alto)
+    binarizacion(img,ancho,alto)
+    formas(img,ancho,alto)
     return imageng
 
 def filtro(img,ancho,alto):
@@ -143,6 +145,72 @@ def byeruido(img2,ancho,alto):
     timei = time()
     timef = timei -t2
     print "el tiempo para quitar el ruido es:"+str(timef)+"segundos"
+
+def binarizacion(img,ancho,alto):
+    z= random.randint(0,100)
+    pixel=img.load()
+    for i in range (ancho):
+        for j in range(alto):
+            (r,g,b)=img.getpixel((i,j))
+            prom = (r+g+b)/3
+            if (prom > z):
+                pixel[i,j]= (255,255,255)
+            else:
+                pixel[i,j] = (0,0,0)
+    img = img.save('binarizada.jpg')
+
+def formas(img,ancho,alto):
+    pixel= img.load()
+    for i in range(ancho):
+        for j in range(alto):
+            if pixel[i,j]== (0,0,0):
+                a=random.randint(0,255)
+                b=random.randint(0,255)
+                c=random.randint(0,255)
+                (r,g,b)= (a,b,c)
+                bfs(img,ancho,alto,(r,g,b),(i,j)) #se llama a la funcion bfs
+
+def bfs(img,ancho,alto,color,posa):
+    pixel= img.load()
+    cola=[] #creamos la cola
+    cola.append(posa) #posicion actual se agrega a la cola
+    inicio = pixel[posa]
+    while len(cola)>0: 
+        (i,j)=cola.pop(0)
+        posa = pixel[i,j]
+        if (posa == inicio or posa ==color):
+            try:
+                if(pixel[i-1,j]):
+                       if(pixel[i-1,j]==inicio):
+                           pixel[i-1,j] = color
+                           cola.append((i-1,j))
+            except:
+                pass
+            try:
+                if(pixel[i+1,j]):
+                       if(pixel[i+1,j]==inicio):
+                           pixel[i+1,j] = color
+                           cola.append((i+1,j))
+            except:
+                pass
+            try:
+                if(pixel[i,j-1]):
+                       if(pixel[i,j-1]==inicio):
+                           pixel[i,j-1] = color
+                           cola.append((i,j-1))
+            except:
+                pass
+            try:
+                if(pixel[i,j+1]):
+                       if(pixel[i,j+1]==inicio):
+                           pixel[i,j+1] = color
+                           cola.append((i,j+1))
+            except:
+                pass
+    img = img.save('forms.jpg')
+
+#def centros():
+
 
 def main ():
     pygame.init()
