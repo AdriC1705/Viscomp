@@ -1,7 +1,7 @@
 import Image #esto para trabajar con imagenes
 import sys
 import pygame
-import math
+from math import *
 from time import *
 import random
 import ImageDraw
@@ -13,8 +13,9 @@ maximo = 200
 
 #cargamos y abrimos imagen
 def imagen():
-    img = Image.open("figs.jpg")
-    img2= Image.open("figs.jpg")
+    img = Image.open("prueba.png")
+    img2= Image.open("prueba.png")
+    img6 =Image.open("prueba.png")
     ancho,alto = img.size
     img = eg(img,ancho,alto,img2)
     return img, ancho, alto
@@ -35,6 +36,7 @@ def eg(img,ancho,alto,img2):
     byeruido(img2,ancho,alto)
     binarizacion(img,ancho,alto)
     formas(img,ancho,alto)
+    convex(img,ancho,alto)
     return imageng
 
 def filtro(img,ancho,alto):
@@ -98,7 +100,7 @@ def conv(img,ancho,alto):
             grad = math.sqrt(pow(sumx,2)+pow(sumy,2))
             grad = int(grad)
             pixels[i,j] = (grad,grad,grad)
-    im= img.save('conv.jpg')
+    im= img.save('conv.png')
     timei=time()
     timef= timei - tiemp
     print "Tiempo de ejecucion deteccion de bordes: "+str(timef)+"segundos"
@@ -158,7 +160,7 @@ def binarizacion(img,ancho,alto):
                 pixel[i,j]= (255,255,255)
             else:
                 pixel[i,j] = (0,0,0)
-    img = img.save('binarizada.jpg')
+    img.save('binarizada.jpg')
 
 def formas(img,ancho,alto):
     pixel= img.load()
@@ -174,7 +176,7 @@ def formas(img,ancho,alto):
                 c=random.randint(0,255)
                 (r,g,b)= (a,b,c)
                 #bfs(img,ancho,alto,(r,g,b),(i,j)) #se llama a la funcion bfs
-                cont,color,c1,c2 = bfs(img,ancho,alto,(r,g,b),(i,j))
+                cont,color,c1,c2,pts,bla = bfs(img,ancho,alto,(r,g,b),(i,j))
                 por=(cont/float(ancho*alto))*100
                 if por>.1:
                     cntdr.append(cont)
@@ -183,7 +185,9 @@ def formas(img,ancho,alto):
                 #print 'ya pase'
                 try:
 #c1 =centro 1 y c2 = centro 2
-                    cm.append((sum(c1)/float(len(c1)),sum(c2)/float(len(c2))))
+                    cms=((sum(c1)/float(len(c1)),sum(c2)/float(len(c2))))
+                    cm.append(cms)
+                    fig = circulos(bla,cms,cont,color)
                 except:
                     pass
 #print 'sali'
@@ -202,7 +206,7 @@ def formas(img,ancho,alto):
     draw=ImageDraw.Draw(img)
     for i,Z in enumerate(cm):
         draw.ellipse((Z[0]-2,Z[1]-2,Z[0]+2,Z[1]+2),fill=(0,0,0))# dibujar elipse 
-    img =img.save('cm.jpg')
+    img3 =img.save('cm.jpg')
 
 def bfs(img,ancho,alto,color,posa):
     pixel= img.load()
@@ -210,7 +214,9 @@ def bfs(img,ancho,alto,color,posa):
     cen1=[]
     cen2=[]
     cola=[] #creamos la cola
+    puntos = []
     cola.append(posa) #posicion actual se agrega a la cola
+    bla = posa
     inicio = pixel[posa]
     while len(cola)>0: 
         (i,j)=cola.pop(0)
@@ -224,6 +230,7 @@ def bfs(img,ancho,alto,color,posa):
                         cont+=1 # contador para encontrar los pixeles ke van en gris
                         cen1.append((i-1))
                         cen2.append((j))
+                        puntos.append((i-1,j))
             except:
                 pass
             try:
@@ -234,6 +241,7 @@ def bfs(img,ancho,alto,color,posa):
                         cont+=1
                         cen1.append((i+1))
                         cen2.append((j))
+                        puntos.append((i+1,j))
             except:
                 pass
             try:
@@ -244,6 +252,7 @@ def bfs(img,ancho,alto,color,posa):
                         cont+=1
                         cen1.append((i))
                         cen2.append((j-1))
+                        puntos.append((i,j-1))
             except:
                 pass
             try:
@@ -254,10 +263,74 @@ def bfs(img,ancho,alto,color,posa):
                         cont+=1
                         cen1.append((i))
                         cen2.append((j+1))
+                        puntos.append((i,j+1))
             except:
                 pass
     img = img.save('forms.jpg')
-    return cont,color,cen1,cen2
+    return cont,color,cen1,cen2,puntos,bla
+
+def convex(img,ancho,alto):
+    pixel= img.load()
+    pts=[]
+    for i in range(ancho):
+        for j in range(alto):
+            if pixel[i,j]==(255,255,255):
+                a= 127
+                b=255
+                c=0
+                (r,g,b)= (a,b,c)
+                cont,color,cen1,cen2,puntos=bfs(img,ancho,alto,(r,g,b),(i,j))  
+                pts.append(jarvis(puntos))
+    draw=ImageDraw.Draw(img)
+    for pts in pts:
+        for pts in pts:
+            pixel[pts]= (255,0,0)
+            blue =(0,0,255)
+            draw.line(pts,blue,width=1000)
+            print 'aki ando'
+    img4 = img.save('contorno.jpg')
+    return pts
+
+def turn(p1, p2, p3):
+    t = cmp(0, (p2[0] - p1[0])*(p3[1] - p1[1]) - (p3[0] - p1[0])*(p2[1] - p1[1]))
+    if t == -1: return 'LEFT'
+    elif t == 0: return 'NONE'
+    elif t == 1: return 'RIGHT'
+
+def jarvis(S):
+    hull =[min(S)]
+    print hull
+    i =0
+    while(S):
+        end = S[0]
+        for j in range(len(S)-1):
+            minimo = min(hull[i],end)
+            if end == hull[i] or turn(S[j],hull[i],end)== 'LEFT':
+                end = S[j]
+        i+=1
+        hull.append(end)
+        print hull
+        if  end == hull[0]:
+            break
+    return hull
+
+def circulos(bla,cms,cont,color):
+    print '---Analizando Forma---'
+    x1,y1 = bla
+    x2,y2 = cms
+    print '-- Punto de inicio:'+str(bla)
+    print '-- Centro: '+str(cms)
+    area = cont 
+    print '--Area de la Fig revisada:'+str(area)
+    radio = math.sqrt(((x2-x1)**2)+((y2-y1)**2))
+    print '--Radio:'+str(radio)
+    revarea=(pi*(pow(radio)))
+    print '--Area del posible circulo:'+str(revarea)
+    print '--Comparando Areas -- '
+    if(revarea-100)<area<(revarea+100):
+        print 'Si es circulo'
+    else:
+        print 'No es circulo'
 
 
 def main ():
