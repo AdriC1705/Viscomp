@@ -1,5 +1,37 @@
 ---------------------------------------------------------
-
-                                    Proyecto Vision Computacional
-                                    
 ---------------------------------------------------------
+|                                                       |
+|           Proyecto Vision Computacional               |
+|                                                       |
+---------------------------------------------------------
+
+    Instalacion:
+    
+        Para la correcta funcion de este software es
+        necesario tener instalado en nuestro sistema
+        lo siguiente:
+        
+            *Python
+                (Lenguaje del programa)
+            
+            *PIL 
+                (Para el manejo de imagenes)
+            
+            *OpenCv 
+                (http://goo.gl/Ulu51)
+            
+        Ademas de tener eso ya instalado, el software
+        no requiere de una instalacion extra necesaria,
+        solo hay que descargarlo y correrlo de la 
+        manera en que se indica dentro del readme.
+
+----------------------------------------------------------
+
+    Nota:
+    
+        Es necesario tener Opencv ya que el software
+        utiliza librerias que opencv proporciona, de
+        lo contrario el software no funcionara.
+        
+-----------------------------------------------------------
+-----------------------------------------------------------
